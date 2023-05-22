@@ -1,33 +1,9 @@
-var tasks = [];
-
-var tasksQuantity = 0;
-var msg = '';
-
-function checkMsg(item) {
-  if (item.tasksQuantity == 0) {
-    item.msg = 'No tasks left!'
-  }
-  if (item.tasksQuantity == 1) {
-    item.msg = 'Only one more task to go!'
-  }
-  if (item.tasksQuantity > 1) {
-    item.msg = item.tasksQuantity + ' more tasks left.'
-  }
-}
-
-function upadteQuantity(item) {
-  item.tasksQuantity = 0;
-  (item.tasks).forEach(task => {
-    if (task.done == false) {
-      item.tasksQuantity++;
-    }
-  });
-}
-
 const ToDoList = {
   data() {
     return{
-      tasks: window.tasks,
+      tasks: [],
+      tasksQuantity: 0,
+      msg: '',
       newTask: {
         "content":"",
         "priority":"",
@@ -42,26 +18,59 @@ const ToDoList = {
       if (confirm("Clear tasks list? This action can't be undone!")) {
         this.tasks=[];
         this.tasksQuantity = 0;
-        checkMsg(this);
+        this.checkMsg();
+        this.storeTasks();
       } else {
         return;
       }
     },
     changeStatus: function(task){
       task.done = !task.done;
-      upadteQuantity(this);
-      checkMsg(this);
+      this.updateQuantity();
+      this.storeTasks();
+      this.checkMsg();
     },   
     addTask: function(newTask){
       this.tasks.push(newTask);
-      upadteQuantity(this);
+      this.storeTasks();
+      this.updateQuantity();
       this.newTask={
         "content":"",
         "priority":"",
         "done": false
       };
-      checkMsg(this);
-    }    
-  }  
+      this.checkMsg();
+    },
+    storeTasks: function() {
+      localStorage.setItem("tasks", JSON.stringify(this.tasks));
+    },
+    checkMsg: function () {
+      switch (this.tasksQuantity) {
+        case 0:
+          this.msg = 'No tasks left!';
+          break;
+        case 1:
+          this.msg = 'Only one more task to go!';
+          break;
+        default:
+          this.msg = this.tasksQuantity + ' more tasks left.';
+          break;
+      }
+    },
+    updateQuantity: function() {
+      this.tasksQuantity = 0;
+      (this.tasks).forEach(task => {
+        if (task.done == false) {
+          this.tasksQuantity++;
+        }
+      });
+    }
+  },
+  created() {
+    this.tasks = localStorage.getItem("tasks") ? JSON.parse(localStorage.getItem("tasks")) : this.tasks;
+    this.updateQuantity();
+    this.checkMsg();
+  }
 }
+
 Vue.createApp(ToDoList).mount('#app');

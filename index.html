@@ -31,6 +31,7 @@
 
                 <button 
                 class="clear"
+                v-if="tasks.length"
                 @click="clearAlert()">Clear all</button>
 
                 <input v-model="newTask.content" type="text" placeholder="Escreva uma nova tarefa...">
